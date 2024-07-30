@@ -1,0 +1,50 @@
+import React, { useState, useEffect } from 'react';
+import getSheetData from '../utils/googleSheetsAPI';
+
+function Dashboard() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const sheetData = await getSheetData('YOUR_SPREADSHEET_ID', 'Sheet1!A1:D5');
+        setData(sheetData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div>
+      <table>
+        <thead>
+          <tr>
+            {data[0].map((header, index) => (
+              <th key={index}>{header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.slice(1).map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default Dashboard;
